@@ -797,7 +797,7 @@ function buildDay(dayKey) {
   const meta    = DAY_META[dayKey];
   const shows   = SHOWS.filter(s => s[0] === dayKey);
   const mins    = shows.flatMap(s => [t2m(s[2]), t2m(s[3])]);
-  const t0      = Math.floor(Math.min(...mins) / 60) * 60;
+  const t0      = Math.min(...mins); // Start exactly at first show
   const t1      = Math.ceil(Math.max(...mins)  / 60) * 60;
   const totalH  = t1 - t0;           // minutes
   const totalPx = totalH * PX;
@@ -856,27 +856,27 @@ function buildDay(dayKey) {
   timeCol.className = 'time-col';
   timeCol.style.height = totalPx + 'px';
 
-  for (let h = 0; h <= totalH / 60; h++) {
-    const tm = t0 + h * 60;
-    const y  = h * 60 * PX;
+  const firstHour = Math.ceil(t0 / 60) * 60;
+  for (let tm = firstHour; tm <= t1; tm += 60) {
+    const y = (tm - t0) * PX;
     const mk = document.createElement('div');
     mk.className = 'time-marker';
     mk.style.top = y + 'px';
     mk.style.height = 60 * PX + 'px';
     const lbl = document.createElement('div');
     lbl.className = 'time-label';
-    lbl.textContent = String((tm / 60) % 24).padStart(2,'0') + ':00';
+    lbl.textContent = String(Math.floor(tm / 60) % 24).padStart(2,'0') + ':00';
     mk.appendChild(lbl);
     timeCol.appendChild(mk);
 
     // half hour
-    if (h < totalH / 60) {
+    if (tm + 30 <= t1) {
       const mk2 = document.createElement('div');
       mk2.className = 'time-marker half';
-      mk2.style.top  = (y + 30 * PX) + 'px';
+      mk2.style.top = (y + 30 * PX) + 'px';
       const lbl2 = document.createElement('div');
       lbl2.className = 'time-label';
-      lbl2.textContent = String((tm / 60) % 24).padStart(2,'0') + ':30';
+      lbl2.textContent = String(Math.floor(tm / 60) % 24).padStart(2,'0') + ':30';
       mk2.appendChild(lbl2);
       timeCol.appendChild(mk2);
     }
