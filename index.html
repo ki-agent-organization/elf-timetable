@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Electric Love 2026 – Timetable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+
+/* ── Reset & Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --mainstage:    #D62839;
+  --heineken:     #007A40;
+  --circus:       #E07B00;
+  --blueboxx:     #0050CC;
+  --shutdown:     #7A00BB;
+  --hardvalley:   #CC3600;
+  --nordic:       #007C88;
+
+  --mainstage-l:  #FCEAEC;
+  --heineken-l:   #E2F4EB;
+  --circus-l:     #FEF0DF;
+  --blueboxx-l:   #E0EAFF;
+  --shutdown-l:   #F2E0FF;
+  --hardvalley-l: #FAEAE0;
+  --nordic-l:     #DCF3F5;
+
+  --bg:       #FFFFFF;
+  --surface:  #F2F2F7;
+  --text:     #111111;
+  --subtle:   #6B7280;
+  --border:   #E5E5EA;
+  --grid-alt: #F8F8FA;
+
+  --hdr-h:   68px;
+  --time-w:  64px;
+  --stage-h: 52px;
+  --col-w:   168px;
+
+  --card-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
+  --card-radius: 8px;
+}
+
+html, body { height: 100%; background: var(--surface); }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: #0D0D0D;
+  display: flex; align-items: center; gap: 0;
+  padding: 0 20px;
+  height: var(--hdr-h);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* thin accent stripe at nav bottom – color set by JS */
+.nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--day-accent, #D62839);
+  transition: background 0.25s;
+}
+
+.nav-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  color: white;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  margin-right: 28px;
+}
+
+.day-btns {
+  display: flex; gap: 6px;
+  flex: 1;
+}
+
+.day-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.6);
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.day-btn:hover { border-color: white; color: white; }
+.day-btn.active {
+  color: white;
+  border-color: transparent;
+}
+
+.print-btn {
+  margin-left: auto;
+  background: white;
+  color: #111;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 18px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  transition: opacity 0.15s;
+}
+.print-btn:hover { opacity: 0.85; }
+
+/* ── Day section ──────────────────────────────────────────────────────────── */
+.day-section {
+  display: none;
+  background: var(--bg);
+  margin: 0;
+}
+.day-section.active { display: block; }
+
+/* ── Day header ───────────────────────────────────────────────────────────── */
+.day-header {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px 14px;
+  border-bottom: 2px solid currentColor;
+  gap: 14px;
+  background: var(--bg);
+}
+
+.day-header-name {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: 2px;
+}
+.day-header-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+  letter-spacing: 0.3px;
+}
+.day-header-sub {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 5px;
+  color: white;
+}
+.day-header-sub span { color: white; }
+
+/* ── Grid ─────────────────────────────────────────────────────────────────── */
+.grid-scroll {
+  overflow-x: auto;
+}
+
+.grid {
+  display: grid;
+  /* columns: time-label + stage columns */
+  min-width: max-content;
+}
+
+/* ── Stage headers ────────────────────────────────────────────────────────── */
+.stage-headers {
+  display: contents;
+}
+
+.time-header {
+  position: sticky; left: 0; z-index: 10;
+  background: white;
+  width: var(--time-w);
+  height: var(--stage-h);
+  flex-shrink: 0;
+  border-bottom: 2px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+
+.stage-header {
+  height: var(--stage-h);
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  color: white;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1.3;
+  letter-spacing: 0.3px;
+  border-right: 2px solid white;
+  padding: 6px 8px;
+  width: var(--col-w);
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+/* ── Grid body ────────────────────────────────────────────────────────────── */
+.grid-body {
+  position: relative;
+  display: flex;
+}
+
+.time-col {
+  position: sticky; left: 0; z-index: 5;
+  width: var(--time-w);
+  flex-shrink: 0;
+  background: white;
+  border-right: 1px solid var(--border);
+}
+
+.time-marker {
+  position: absolute;
+  right: 0; left: 0;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: flex-start;
+  justify-content: flex-end;
+  padding-right: 8px;
+}
+.time-marker.half {
+  border-top: 1px dashed #E8E8E8;
+}
+.time-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
+  margin-top: -7px;
+  white-space: nowrap;
+}
+.time-marker.half .time-label {
+  font-size: 9px;
+  font-weight: 400;
+  color: #BBBBBB;
+}
+
+/* ── Stage columns ────────────────────────────────────────────────────────── */
+.stage-cols {
+  display: flex;
+  flex: 1;
+}
+
+.stage-col {
+  position: relative;
+  width: var(--col-w);
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+}
+
+/* alternating hour bands */
+.hour-band {
+  position: absolute;
+  left: 0; right: 0;
+  background: var(--grid-alt);
+  pointer-events: none;
+}
+
+/* ── Artist blocks ────────────────────────────────────────────────────────── */
+.show-block {
+  position: absolute;
+  left: 3px; right: 3px;
+  border-radius: var(--card-radius);
+  overflow: hidden;
+  border-left: 5px solid;
+  background: var(--bg);
+  padding: 5px 8px 5px 9px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  cursor: default;
+  box-shadow: var(--card-shadow);
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.show-block:hover {
+  box-shadow: 0 3px 10px rgba(0,0,0,0.13), 0 0 0 1px rgba(0,0,0,0.06);
+  transform: translateY(-1px);
+}
+
+.show-time {
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.2;
+  opacity: 0.9;
+  white-space: nowrap;
+  letter-spacing: 0.1px;
+}
+.show-name {
+  font-size: 11.5px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: #111;
+  margin-top: 1px;
+  overflow: hidden;
+}
+
+/* ── Legend ───────────────────────────────────────────────────────────────── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+.legend-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 10.5px; font-weight: 600; color: var(--subtle);
+  letter-spacing: 0.1px;
+}
+.legend-dot {
+  width: 8px; height: 8px; border-radius: 2px;
+  flex-shrink: 0;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 9.5px;
+  color: #C0C0C8;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  letter-spacing: 0.3px;
+}
+
+/* ── View-Toggle ───────────────────────────────────────────────────────────── */
+.view-toggle {
+  display: flex;
+  background: rgba(255,255,255,0.1);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-left: 12px;
+  flex-shrink: 0;
+}
+.view-toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  display: flex; align-items: center; gap: 5px;
+  transition: all 0.15s;
+  letter-spacing: 0.3px;
+}
+.view-toggle-btn.active { background: rgba(255,255,255,0.2); color: white; }
+.view-toggle-btn:hover  { color: white; }
+
+/* ── Listenansicht ─────────────────────────────────────────────────────────── */
+.list-section { display: none; }
+.list-section.active { display: block; }
+
+.list-sort-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border-bottom: 1px solid #F0F0F0;
+  background: #FAFAFA;
+}
+.list-sort-label { font-size: 11px; color: #AAA; font-weight: 600; }
+.sort-btn {
+  background: transparent;
+  border: 1.5px solid #DDD;
+  border-radius: 5px;
+  padding: 4px 11px;
+  font-size: 11px; font-weight: 700;
+  color: #888; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.12s;
+}
+.sort-btn.active          { background: #111; color: white; border-color: #111; }
+.sort-btn:not(.active):hover { border-color: #999; color: #444; }
+
+.list-body-wrap { padding: 4px 12px 24px; }
+
+.list-time-group {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 0 5px;
+  font-size: 10.5px; font-weight: 800;
+  color: #BBB; letter-spacing: 0.8px;
+}
+.list-time-group::after { content: ''; flex: 1; height: 1px; background: #EBEBEB; }
+
+.list-stage-group-hdr {
+  color: white; font-weight: 700; font-size: 12px;
+  padding: 7px 12px; border-radius: 6px;
+  margin: 14px 0 6px;
+  letter-spacing: 0.3px;
+  print-color-adjust: exact; -webkit-print-color-adjust: exact;
+}
+
+.list-item {
+  display: flex; align-items: stretch;
+  margin: 3px 0; border-radius: 7px;
+  overflow: hidden; border: 1px solid #EBEBEB;
+  background: white; transition: box-shadow 0.12s;
+}
+.list-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.09); }
+
+.list-item-bar  { width: 5px; flex-shrink: 0; }
+.list-item-body { flex: 1; padding: 8px 12px; }
+
+.list-item-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
+.list-item-time  { font-size: 10px; font-weight: 700; color: #777; white-space: nowrap; }
+.list-item-stage { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; color: white; }
+.list-item-name  { font-size: 15px; font-weight: 800; color: #111; line-height: 1.2; }
+
+/* ── Raster-Kopfzeile (sticky, top per JS gesetzt) ────────────────────────── */
+.stage-header-wrap {
+  display: flex;
+  position: sticky;
+  top: 72px;        /* Fallback; wird per JS auf echte Nav-Höhe gesetzt */
+  z-index: 8;
+  background: white;
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 680px) {
+  /* Nav */
+  .nav {
+    flex-wrap: wrap;
+    height: auto;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  .nav-title   { font-size: 20px; margin-right: 0; }
+  .day-btns    { order: 3; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+  .day-btn     { padding: 7px 4px; font-size: 11px; text-align: center; justify-content: center; }
+  .view-toggle { margin-left: auto; }
+  .print-btn   { display: none; }
+
+  /* Grid */
+  :root {
+    --col-w:   110px;
+    --time-w:    0px;
+    --stage-h:  46px;
+  }
+  .time-col       { display: none !important; }
+  .time-header    { display: none !important; }
+  .time-marker.half { display: none !important; }
+  .time-marker    { border-top-color: #EEEEEE !important; }
+  .stage-header   { font-size: 10px; border-right-width: 1px; }
+  .day-header     { padding: 12px 12px 10px; flex-wrap: wrap; gap: 6px; }
+  .day-header-name { font-size: 26px; }
+  .legend         { padding: 10px 12px; gap: 8px; }
+  .legend-item    { font-size: 10px; }
+  .footer         { padding: 6px 12px; font-size: 9px; }
+  .grid-scroll    { -webkit-overflow-scrolling: touch; }
+
+  /* iOS-Style Cards */
+  .show-block {
+    border-left-width: 0 !important;
+    border-radius: 12px !important;
+    left: 2px !important; right: 2px !important;
+    padding: 5px 8px !important;
+    background: var(--tint, #F5F5F5) !important;
+    box-shadow: none !important;
+    transform: none !important;
+  }
+  .show-block:hover { transform: none !important; }
+  .show-time {
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    opacity: 1 !important;
+    color: var(--stage-color, #555) !important;
+  }
+  .show-name {
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    color: #111 !important;
+  }
+}
+@media (max-width: 400px) {
+  .day-btns { grid-template-columns: repeat(2, 1fr); }
+  :root { --col-w: 90px; }
+}
+
+/* ── Druck: dediziertes A4-Layout ─────────────────────────────────────────── */
+#print-layout { display: none; }
+
+@media print {
+  @page { size: A4 landscape; margin: 0; }
+  html, body {
+    background: white;
+    margin: 0; padding: 0;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  .nav          { display: none !important; }
+  #app          { display: none !important; }
+  #list-app     { display: none !important; }
+  #print-layout { display: block !important; }
+}
+
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav class="nav">
+  <div class="nav-title">⚡ ELF 2026</div>
+  <div class="day-btns">
+    <button class="day-btn" data-day="mi" onclick="showDay('mi')">Mi 8. Juli</button>
+    <button class="day-btn" data-day="do" onclick="showDay('do')">Do 9. Juli</button>
+    <button class="day-btn" data-day="fr" onclick="showDay('fr')">Fr 10. Juli</button>
+    <button class="day-btn" data-day="sa" onclick="showDay('sa')">Sa 11. Juli</button>
+  </div>
+  <div class="view-toggle">
+    <button class="view-toggle-btn active" data-view="grid" onclick="setView('grid')">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="0" y="0" width="5" height="5" rx="1"/><rect x="7" y="0" width="5" height="5" rx="1"/><rect x="0" y="7" width="5" height="5" rx="1"/><rect x="7" y="7" width="5" height="5" rx="1"/></svg>
+      Raster
+    </button>
+    <button class="view-toggle-btn" data-view="list" onclick="setView('list')">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><rect x="0" y="1" width="12" height="2" rx="1"/><rect x="0" y="5" width="12" height="2" rx="1"/><rect x="0" y="9" width="12" height="2" rx="1"/></svg>
+      Liste
+    </button>
+  </div>
+  <button class="print-btn" onclick="window.print()">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/>
+    </svg>
+    Als PDF drucken
+  </button>
+</nav>
+
+<!-- Timetable sections will be injected here -->
+<div id="app"></div>
+<div id="list-app"></div>
+<div id="print-layout"></div>
+
+<script>
+// ── Daten ──────────────────────────────────────────────────────────────────
+const STAGE_COLOR = {
+  "Mainstage":                "#D62839",
+  "Heineken Starclub":        "#007A40",
+  "Club Circus":              "#E07B00",
+  "BlueBoXX":                 "#0050CC",
+  "Shutdown Stage":           "#7A00BB",
+  "Hard Dance Valley":        "#CC3600",
+  "The Nordic Spirit Hut":    "#007C88",
+};
+const STAGE_LIGHT = {
+  "Mainstage":                "#FAEAEC",
+  "Heineken Starclub":        "#E3F4EB",
+  "Club Circus":              "#FDF0DF",
+  "BlueBoXX":                 "#E0EAFF",
+  "Shutdown Stage":           "#F0E0FF",
+  "Hard Dance Valley":        "#FAE8E0",
+  "The Nordic Spirit Hut":    "#DEF2F4",
+};
+
+const STAGES_BY_DAY = {
+  mi: ["BlueBoXX","Club Circus","The Nordic Spirit Hut"],
+  do: ["Mainstage","Heineken Starclub","Club Circus","BlueBoXX","Shutdown Stage","Hard Dance Valley","The Nordic Spirit Hut"],
+  fr: ["Mainstage","Heineken Starclub","Club Circus","BlueBoXX","Shutdown Stage","Hard Dance Valley","The Nordic Spirit Hut"],
+  sa: ["Mainstage","Heineken Starclub","Club Circus","BlueBoXX","Shutdown Stage","Hard Dance Valley","The Nordic Spirit Hut"],
+};
+
+const DAY_META = {
+  mi: { label:"MITTWOCH",  date:"8. Juli 2026",  sub:"Warm-Up Party", accent:"#0050CC" },
+  do: { label:"DONNERSTAG",date:"9. Juli 2026",  sub:"",              accent:"#D62839" },
+  fr: { label:"FREITAG",   date:"10. Juli 2026", sub:"",              accent:"#D62839" },
+  sa: { label:"SAMSTAG",   date:"11. Juli 2026", sub:"",              accent:"#D62839" },
+};
+
+// [day, stage, start, end, name]
+const SHOWS = [
+  // MITTWOCH
+  ["mi","BlueBoXX",              "18:30","19:10","ST|MK"],
+  ["mi","Club Circus",           "18:30","19:00","TOVY"],
+  ["mi","The Nordic Spirit Hut", "18:30","19:30","Pablo"],
+  ["mi","Club Circus",           "19:00","20:00","FÄT TONY"],
+  ["mi","BlueBoXX",              "19:10","20:00","El Pablo"],
+  ["mi","The Nordic Spirit Hut", "19:30","20:30","2 Tonic"],
+  ["mi","Club Circus",           "20:00","21:00","Bovski"],
+  ["mi","BlueBoXX",              "20:00","21:00","Kara"],
+  ["mi","The Nordic Spirit Hut", "20:30","21:30","DJ Stardust b2b Benjamin Zane"],
+  ["mi","BlueBoXX",              "21:00","22:00","Annix"],
+  ["mi","Club Circus",           "21:00","22:15","REWI"],
+  ["mi","The Nordic Spirit Hut", "21:30","22:30","Romy Relay"],
+  ["mi","BlueBoXX",              "22:00","23:00","Skantia"],
+  ["mi","Club Circus",           "22:25","23:25","Glueboys"],
+  ["mi","The Nordic Spirit Hut", "22:30","00:00","Rene de Kleijn"],
+  ["mi","BlueBoXX",              "23:00","00:00","Circadian"],
+  ["mi","Club Circus",           "23:30","00:30","Luca-Dante Spadafora"],
+  ["mi","The Nordic Spirit Hut", "00:00","01:00","Justfränds"],
+  ["mi","BlueBoXX",              "00:00","01:00","Mefjus feat. Daxta MC"],
+  ["mi","Club Circus",           "00:30","02:00","Holy Priest"],
+  ["mi","The Nordic Spirit Hut", "01:00","02:00","DJ Benj"],
+  ["mi","BlueBoXX",              "01:00","02:00","RageMode feat. Daxta MC"],
+  // DONNERSTAG
+  ["do","BlueBoXX",              "16:30","16:55","Annzie"],
+  ["do","Club Circus",           "16:30","17:30","AUTOFLOWER"],
+  ["do","Mainstage",             "16:30","17:00","Bonnie Callini"],
+  ["do","The Nordic Spirit Hut", "16:30","17:30","Danny Suko b2b itsmedee"],
+  ["do","Hard Dance Valley",     "16:30","18:00","Krachschoppen pres. Noiseflow, Cyber Gunz, Schlot & Vane"],
+  ["do","Shutdown Stage",        "16:30","17:30","Redhead"],
+  ["do","Heineken Starclub",     "16:30","17:20","Tommic"],
+  ["do","BlueBoXX",              "16:55","17:35","Celeste b2b Lucaz"],
+  ["do","Mainstage",             "17:00","18:00","Ares Carter"],
+  ["do","Heineken Starclub",     "17:20","18:10","Busensound"],
+  ["do","Shutdown Stage",        "17:30","18:30","Agent NoooN"],
+  ["do","The Nordic Spirit Hut", "17:30","19:00","Chris Cage"],
+  ["do","Club Circus",           "17:30","18:30","Trancendence"],
+  ["do","BlueBoXX",              "17:35","18:15","Julien Relive"],
+  ["do","Mainstage",             "18:00","19:00","Mole & Jean Philippe"],
+  ["do","Hard Dance Valley",     "18:00","19:00","Outsiders"],
+  ["do","Heineken Starclub",     "18:10","19:00","WESH"],
+  ["do","BlueBoXX",              "18:15","19:00","ESH"],
+  ["do","Club Circus",           "18:30","19:45","Elotrance b2b Justin Tinderdate"],
+  ["do","Shutdown Stage",        "18:30","19:30","Eternate pres. Echter Techno"],
+  ["do","Mainstage",             "19:00","20:05","Ely Oaks"],
+  ["do","Hard Dance Valley",     "19:00","20:00","Fantasm"],
+  ["do","The Nordic Spirit Hut", "19:00","20:30","Rene de Kleijn"],
+  ["do","BlueBoXX",              "19:00","19:45","VisionV"],
+  ["do","Heineken Starclub",     "19:00","19:50","WIDENOIZE"],
+  ["do","Shutdown Stage",        "19:30","20:30","KATALYZE"],
+  ["do","BlueBoXX",              "19:45","20:40","Freespirit"],
+  ["do","Club Circus",           "19:45","21:15","Trancemaster Krause"],
+  ["do","Heineken Starclub",     "19:50","20:40","Subsurface"],
+  ["do","Hard Dance Valley",     "20:00","21:00","D-Block & S-te-Fan"],
+  ["do","Mainstage",             "20:10","21:10","Levi"],
+  ["do","The Nordic Spirit Hut", "20:30","22:00","DJ Stardust b2b Benjamin Zane"],
+  ["do","Shutdown Stage",        "20:30","21:30","Infliction"],
+  ["do","BlueBoXX",              "20:40","21:30","Luke Alexander"],
+  ["do","Heineken Starclub",     "20:40","21:40","Power Hour by Pazoo"],
+  ["do","Hard Dance Valley",     "21:00","22:00","Rooler"],
+  ["do","Mainstage",             "21:10","22:10","Sofi Tukker"],
+  ["do","Club Circus",           "21:15","22:30","Sauber"],
+  ["do","Shutdown Stage",        "21:30","22:30","Anderex b2b Toxic Machinery"],
+  ["do","BlueBoXX",              "21:30","22:30","RBØR"],
+  ["do","Heineken Starclub",     "21:40","22:30","OBS"],
+  ["do","The Nordic Spirit Hut", "22:00","23:30","DJ Squared"],
+  ["do","Hard Dance Valley",     "22:00","23:00","Vertile"],
+  ["do","Mainstage",             "22:10","22:30","Opening Ceremony"],
+  ["do","Shutdown Stage",        "22:30","23:30","99Prblmz"],
+  ["do","Mainstage",             "22:30","23:30","John Newman"],
+  ["do","Club Circus",           "22:30","23:30","The Rocketman"],
+  ["do","BlueBoXX",              "22:30","23:30","Toby Romeo"],
+  ["do","Heineken Starclub",     "22:30","23:40","Two Kinx"],
+  ["do","Hard Dance Valley",     "23:00","00:00","The Straikerz"],
+  ["do","The Nordic Spirit Hut", "23:30","01:00","Manuh"],
+  ["do","Club Circus",           "23:30","00:45","MCR-T"],
+  ["do","Shutdown Stage",        "23:30","00:15","Pinotello"],
+  ["do","BlueBoXX",              "23:30","00:30","Westend"],
+  ["do","Mainstage",             "23:45","01:00","Swedish House Mafia"],
+  ["do","Heineken Starclub",     "23:50","00:50","Shoki287"],
+  ["do","Hard Dance Valley",     "00:00","01:00","Paul Elstak"],
+  ["do","Shutdown Stage",        "00:15","01:15","Barber"],
+  ["do","BlueBoXX",              "00:30","01:30","SAUBER x VALENZUELA"],
+  ["do","Club Circus",           "00:45","02:00","horsegiirL"],
+  ["do","Hard Dance Valley",     "01:00","02:00","Dimitri K feat. MC Robs"],
+  ["do","Heineken Starclub",     "01:00","02:00","JBS"],
+  ["do","The Nordic Spirit Hut", "01:00","02:00","Miami Boys"],
+  ["do","Mainstage",             "01:05","02:10","Dan Lee Live"],
+  ["do","Shutdown Stage",        "01:15","02:00","Unicorn On K"],
+  ["do","BlueBoXX",              "01:30","03:00","Ely Oaks x BOVSKI"],
+  ["do","Club Circus",           "02:00","03:00","KUKO"],
+  ["do","The Nordic Spirit Hut", "02:00","03:00","Solis"],
+  // FREITAG
+  ["fr","BlueBoXX",              "16:30","19:00","Anna Ullrich"],
+  ["fr","Club Circus",           "16:30","17:00","Kade"],
+  ["fr","Mainstage",             "16:30","17:00","Nicole Da Silva"],
+  ["fr","The Nordic Spirit Hut", "16:30","18:00","Pablo"],
+  ["fr","Hard Dance Valley",     "16:30","17:15","Rudy MC & Shany pres. NEO RAVE"],
+  ["fr","Heineken Starclub",     "16:30","17:20","SMURFY"],
+  ["fr","Shutdown Stage",        "16:30","17:45","Sovero"],
+  ["fr","Mainstage",             "17:00","18:00","Night Tales"],
+  ["fr","Club Circus",           "17:00","17:45","Soka b2b Klinac"],
+  ["fr","Hard Dance Valley",     "17:15","18:00","Lexxy Chainz"],
+  ["fr","Heineken Starclub",     "17:20","18:10","Am3llo"],
+  ["fr","Shutdown Stage",        "17:45","19:00","Chris Armada pres. Faster & Harder"],
+  ["fr","Club Circus",           "17:45","18:30","Feistling b2b Killin Void"],
+  ["fr","The Nordic Spirit Hut", "18:00","20:00","Danny Suko b2b itsmedee"],
+  ["fr","Hard Dance Valley",     "18:00","19:00","Dr Donk & GPF pres. GPF & Dr Donk"],
+  ["fr","Mainstage",             "18:00","19:00","Medun"],
+  ["fr","Heineken Starclub",     "18:10","19:00","Fordeem"],
+  ["fr","Club Circus",           "18:30","19:15","BTWRKS"],
+  ["fr","BlueBoXX",              "19:00","20:30","Millie Forsberg"],
+  ["fr","Heineken Starclub",     "19:00","19:50","AVE"],
+  ["fr","Mainstage",             "19:00","20:00","Dominique Jardin"],
+  ["fr","Hard Dance Valley",     "19:00","20:00","Hardstyle Buamz Live"],
+  ["fr","Shutdown Stage",        "19:00","20:00","Riot Shift b2b elMefti"],
+  ["fr","Club Circus",           "19:15","20:00","Nvadrz & Alias"],
+  ["fr","Heineken Starclub",     "19:50","20:40","Averro"],
+  ["fr","The Nordic Spirit Hut", "20:00","21:00","Benjamin Zane"],
+  ["fr","Shutdown Stage",        "20:00","21:00","Chapter V"],
+  ["fr","Hard Dance Valley",     "20:00","21:00","Coone b2b Gravedgr"],
+  ["fr","Mainstage",             "20:00","21:30","Hugel"],
+  ["fr","Club Circus",           "20:00","21:00","RageMode"],
+  ["fr","BlueBoXX",              "20:30","22:00","SaltySis"],
+  ["fr","Heineken Starclub",     "20:40","21:40","Power Hour by DJ Selecta"],
+  ["fr","Shutdown Stage",        "21:00","22:00","Complex"],
+  ["fr","The Nordic Spirit Hut", "21:00","22:00","Rene de Kleijn"],
+  ["fr","Club Circus",           "21:00","22:00","SOTA"],
+  ["fr","Hard Dance Valley",     "21:00","22:00","TNT"],
+  ["fr","Mainstage",             "21:30","23:00","Tita Lau"],
+  ["fr","Heineken Starclub",     "21:40","22:40","NoooN"],
+  ["fr","BlueBoXX",              "22:00","01:00","A.N.I."],
+  ["fr","Club Circus",           "22:00","23:00","Fox Stevenson DJ Set"],
+  ["fr","Hard Dance Valley",     "22:00","22:15","Halftime Ceremony"],
+  ["fr","Shutdown Stage",        "22:00","23:00","Lekkerfaces"],
+  ["fr","The Nordic Spirit Hut", "22:00","00:00","Manuh"],
+  ["fr","Hard Dance Valley",     "22:15","23:15","Sub Zero Project"],
+  ["fr","Heineken Starclub",     "22:40","23:15","AXMO"],
+  ["fr","Club Circus",           "23:00","00:00","Dan Lee"],
+  ["fr","Mainstage",             "23:00","00:00","Neelix"],
+  ["fr","Shutdown Stage",        "23:00","00:00","T.M.O. b2b Josha"],
+  ["fr","Hard Dance Valley",     "23:15","00:15","Mish"],
+  ["fr","Heineken Starclub",     "23:25","00:50","Kati K"],
+  ["fr","Mainstage",             "00:00","01:00","Armin Van Buuren"],
+  ["fr","The Nordic Spirit Hut", "00:00","01:30","DJ Squared"],
+  ["fr","Club Circus",           "00:00","01:00","Pendulum DJ Set"],
+  ["fr","Shutdown Stage",        "00:00","01:00","Spitnoise"],
+  ["fr","Hard Dance Valley",     "00:15","01:00","Dual Damage"],
+  ["fr","Hard Dance Valley",     "01:00","02:00","Angerfist"],
+  ["fr","BlueBoXX",              "01:00","03:00","Carlo Kalu"],
+  ["fr","Club Circus",           "01:00","02:00","Dimension"],
+  ["fr","Shutdown Stage",        "01:00","02:00","Het Pompstation"],
+  ["fr","Mainstage",             "01:00","02:10","KlangKuenstler"],
+  ["fr","Heineken Starclub",     "01:00","02:00","PA69"],
+  ["fr","The Nordic Spirit Hut", "01:30","03:00","Miami Boys"],
+  ["fr","Club Circus",           "02:00","03:00","Dj Diesel"],
+  // SAMSTAG
+  ["sa","The Nordic Spirit Hut", "16:30","18:00","Danny Suko b2b itsmedee"],
+  ["sa","Club Circus",           "16:30","17:00","DORAH"],
+  ["sa","Hard Dance Valley",     "16:30","17:00","Elasy"],
+  ["sa","Shutdown Stage",        "16:30","17:30","Inner Rage"],
+  ["sa","BlueBoXX",              "16:30","18:00","It's George"],
+  ["sa","Mainstage",             "16:30","17:00","MA:RK"],
+  ["sa","Heineken Starclub",     "16:30","17:30","TEKŪBA"],
+  ["sa","Mainstage",             "17:00","18:00","Deer Jade"],
+  ["sa","Club Circus",           "17:00","18:00","LEVT"],
+  ["sa","Hard Dance Valley",     "17:00","18:00","Zelecter"],
+  ["sa","Heineken Starclub",     "17:30","18:30","LUC"],
+  ["sa","Shutdown Stage",        "17:30","18:30","Outlined"],
+  ["sa","The Nordic Spirit Hut", "18:00","20:00","Chris Cage"],
+  ["sa","BlueBoXX",              "18:00","20:00","Discjockl b2b Klausson"],
+  ["sa","Hard Dance Valley",     "18:00","19:00","Maxtreme"],
+  ["sa","Mainstage",             "18:00","19:15","oskar med k"],
+  ["sa","Club Circus",           "18:00","19:00","Serafina"],
+  ["sa","Shutdown Stage",        "18:30","19:45","Resensed b2b Luke Madness"],
+  ["sa","Heineken Starclub",     "18:30","19:30","Tye Vie"],
+  ["sa","Club Circus",           "19:00","20:00","GRAVEDGR"],
+  ["sa","Hard Dance Valley",     "19:00","20:00","Lost Identity"],
+  ["sa","Mainstage",             "19:15","20:30","Swimming Paul"],
+  ["sa","Heineken Starclub",     "19:30","20:30","TYO"],
+  ["sa","Shutdown Stage",        "19:45","21:00","More Kords pres. Zaagphoric"],
+  ["sa","Hard Dance Valley",     "20:00","21:15","Harris & Ford"],
+  ["sa","The Nordic Spirit Hut", "20:00","22:00","Justfränds"],
+  ["sa","Club Circus",           "20:00","21:00","Stan Christ b2b Jayron"],
+  ["sa","BlueBoXX",              "20:00","21:30","Techno Ganoven"],
+  ["sa","Mainstage",             "20:30","21:30","BUNT."],
+  ["sa","Heineken Starclub",     "20:30","21:30","Rene Rodrigezz"],
+  ["sa","Club Circus",           "21:00","22:30","Alignment"],
+  ["sa","Shutdown Stage",        "21:00","22:00","Toza"],
+  ["sa","Hard Dance Valley",     "21:15","22:15","Ran-D"],
+  ["sa","BlueBoXX",              "21:30","23:00","DK"],
+  ["sa","Heineken Starclub",     "21:30","22:30","Levex"],
+  ["sa","Mainstage",             "21:30","23:00","Paul Kalkbrenner"],
+  ["sa","Shutdown Stage",        "22:00","23:00","Abaddon"],
+  ["sa","The Nordic Spirit Hut", "22:00","00:00","DJ MNS"],
+  ["sa","Hard Dance Valley",     "22:15","23:00","Sickmode"],
+  ["sa","Club Circus",           "22:30","00:00","Winson"],
+  ["sa","Heineken Starclub",     "22:45","23:45","Flip Capella"],
+  ["sa","Mainstage",             "23:00","00:00","KSHMR"],
+  ["sa","Shutdown Stage",        "23:00","00:00","Major Conspiracy"],
+  ["sa","BlueBoXX",              "23:00","00:00","Slashy Disco & Friends"],
+  ["sa","Hard Dance Valley",     "23:00","00:00","The Saints"],
+  ["sa","Heineken Starclub",     "23:50","00:50","Jugo Ürdens"],
+  ["sa","Mainstage",             "00:00","00:10","ELF Relive Show"],
+  ["sa","Hard Dance Valley",     "00:00","01:00","Krowdexx"],
+  ["sa","Club Circus",           "00:00","01:30","Novah"],
+  ["sa","The Nordic Spirit Hut", "00:00","01:30","Rene de Kleijn"],
+  ["sa","BlueBoXX",              "00:00","03:00","Slashy Disco"],
+  ["sa","Shutdown Stage",        "00:00","01:00","Yoshiko"],
+  ["sa","Mainstage",             "00:10","01:10","Dimitri Vegas"],
+  ["sa","Hard Dance Valley",     "01:00","02:00","Gezellige Uptempo pres. SH!T HAPPENS"],
+  ["sa","Shutdown Stage",        "01:00","02:00","Lumex"],
+  ["sa","Heineken Starclub",     "01:00","02:00","Vicky"],
+  ["sa","Mainstage",             "01:10","02:10","Toby Romeo"],
+  ["sa","The Nordic Spirit Hut", "01:30","03:00","DJ Stardust b2b Benjamin Zane"],
+  ["sa","Club Circus",           "01:30","03:00","KARAH"],
+  ["sa","Heineken Starclub",     "02:00","03:00","DJ Wg Abriss by Dan Lee & Friends"],
+];
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function t2m(t) {
+  const [h, m] = t.split(":").map(Number);
+  return (h < 6 ? h + 24 : h) * 60 + m;
+}
+function fmt(t) { return t; }
+
+// ── Build ──────────────────────────────────────────────────────────────────
+const PX = 2.5; // px per minute
+
+function buildDay(dayKey) {
+  const stages  = STAGES_BY_DAY[dayKey];
+  const meta    = DAY_META[dayKey];
+  const shows   = SHOWS.filter(s => s[0] === dayKey);
+  const mins    = shows.flatMap(s => [t2m(s[2]), t2m(s[3])]);
+  const t0      = Math.floor(Math.min(...mins) / 60) * 60;
+  const t1      = Math.ceil(Math.max(...mins)  / 60) * 60;
+  const totalH  = t1 - t0;           // minutes
+  const totalPx = totalH * PX;
+
+  const section = document.createElement('div');
+  section.className = 'day-section';
+  section.dataset.day = dayKey;
+
+  // Day header
+  const hdr = document.createElement('div');
+  hdr.className = 'day-header';
+  hdr.style.color = meta.accent;
+  hdr.style.borderColor = meta.accent;
+  hdr.innerHTML = `
+    <div class="day-header-name" style="color:${meta.accent}">${meta.label}</div>
+    <div class="day-header-date">${meta.date}</div>
+    ${meta.sub ? `<div class="day-header-sub" style="background:${meta.accent}">${meta.sub}</div>` : ''}
+    <div style="margin-left:auto;font-size:10.5px;color:#C0C0C8;font-weight:600;letter-spacing:0.4px">ELECTRIC LOVE FESTIVAL 2026</div>
+  `;
+  section.appendChild(hdr);
+
+  // Grid scroll
+  const scroll = document.createElement('div');
+  scroll.className = 'grid-scroll';
+
+  // Stage headers row
+  const stageHdrRow = document.createElement('div');
+  stageHdrRow.style.cssText = `display:flex; margin-left:${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--time-w')) || 64}px;`;
+  // time placeholder
+  const timePH = document.createElement('div');
+  timePH.style.cssText = `width:64px;flex-shrink:0;`;
+  stageHdrRow.appendChild(timePH);
+
+  // Fixed header wrapper
+  const headerWrap = document.createElement('div');
+  headerWrap.className = 'stage-header-wrap';
+
+  const timeHdrCell = document.createElement('div');
+  timeHdrCell.className = 'time-header';
+  headerWrap.appendChild(timeHdrCell);
+
+  stages.forEach(stage => {
+    const col = document.createElement('div');
+    col.className = 'stage-header';
+    col.style.background = STAGE_COLOR[stage] || '#555';
+    col.textContent = stage;
+    headerWrap.appendChild(col);
+  });
+
+  // Body
+  const body = document.createElement('div');
+  body.className = 'grid-body';
+  body.style.position = 'relative';
+
+  // Time column
+  const timeCol = document.createElement('div');
+  timeCol.className = 'time-col';
+  timeCol.style.height = totalPx + 'px';
+
+  for (let h = 0; h <= totalH / 60; h++) {
+    const tm = t0 + h * 60;
+    const y  = h * 60 * PX;
+    const mk = document.createElement('div');
+    mk.className = 'time-marker';
+    mk.style.top = y + 'px';
+    mk.style.height = 60 * PX + 'px';
+    const lbl = document.createElement('div');
+    lbl.className = 'time-label';
+    lbl.textContent = String((tm / 60) % 24).padStart(2,'0') + ':00';
+    mk.appendChild(lbl);
+    timeCol.appendChild(mk);
+
+    // half hour
+    if (h < totalH / 60) {
+      const mk2 = document.createElement('div');
+      mk2.className = 'time-marker half';
+      mk2.style.top  = (y + 30 * PX) + 'px';
+      const lbl2 = document.createElement('div');
+      lbl2.className = 'time-label';
+      lbl2.textContent = String((tm / 60) % 24).padStart(2,'0') + ':30';
+      mk2.appendChild(lbl2);
+      timeCol.appendChild(mk2);
+    }
+  }
+  body.appendChild(timeCol);
+
+  // Stage columns
+  const stageCols = document.createElement('div');
+  stageCols.className = 'stage-cols';
+
+  stages.forEach(stage => {
+    const col = document.createElement('div');
+    col.className = 'stage-col';
+    col.style.height = totalPx + 'px';
+
+    // alternating bands
+    for (let h = 0; h < totalH / 60; h++) {
+      if (h % 2 === 0) {
+        const band = document.createElement('div');
+        band.className = 'hour-band';
+        band.style.top    = (h * 60 * PX) + 'px';
+        band.style.height = (60 * PX) + 'px';
+        col.appendChild(band);
+      }
+    }
+
+    // shows
+    shows.filter(s => s[1] === stage).forEach(([, , start, end, name]) => {
+      const tm  = t2m(start);
+      const te  = t2m(end);
+      const dur = te - tm;
+      const top = (tm - t0) * PX;
+      const ht  = dur * PX;
+
+      if (top < 0 || ht < 3) return;
+
+      const col_ = STAGE_COLOR[stage] || '#555';
+      const lite = STAGE_LIGHT[stage] || '#F5F5F5';
+
+      const blk = document.createElement('div');
+      blk.className = 'show-block';
+      blk.style.cssText = `
+        top:${top + 2}px;
+        height:${Math.max(ht - 4, 8)}px;
+        border-left-color:${col_};
+        background:white;
+        --tint:${lite};
+        --stage-color:${col_};
+      `;
+
+      if (ht > 14) {
+        const time = document.createElement('div');
+        time.className = 'show-time';
+        time.style.color = col_;
+        time.textContent = `${start} – ${end}`;
+        blk.appendChild(time);
+      }
+
+      if (ht > 22) {
+        const nm = document.createElement('div');
+        nm.className = 'show-name';
+        nm.textContent = name;
+        blk.appendChild(nm);
+      } else if (ht > 10) {
+        const nm = document.createElement('div');
+        nm.className = 'show-name';
+        nm.style.fontSize = '10px';
+        nm.textContent = name;
+        blk.appendChild(nm);
+      }
+
+      col.appendChild(blk);
+    });
+
+    stageCols.appendChild(col);
+  });
+
+  body.appendChild(stageCols);
+
+  // Stitch together
+  const wrapper = document.createElement('div');
+  wrapper.style.cssText = 'display:flex;flex-direction:column;';
+  wrapper.appendChild(headerWrap);
+  wrapper.appendChild(body);
+  scroll.appendChild(wrapper);
+  section.appendChild(scroll);
+
+  // Legend
+  const leg = document.createElement('div');
+  leg.className = 'legend';
+  stages.forEach(stage => {
+    const item = document.createElement('div');
+    item.className = 'legend-item';
+    item.innerHTML = `
+      <div class="legend-dot" style="background:${STAGE_COLOR[stage]||'#555'}"></div>
+      ${stage}
+    `;
+    leg.appendChild(item);
+  });
+  section.appendChild(leg);
+
+  // Footer
+  const foot = document.createElement('div');
+  foot.className = 'footer';
+  foot.textContent = 'Alle Zeiten CET  •  Daten aus der offiziellen ELF-App  •  Änderungen vorbehalten  •  electriclove.at';
+  section.appendChild(foot);
+
+  return section;
+}
+
+// ── Ansicht & Tag ──────────────────────────────────────────────────────────
+let currentDay = 'do';
+let viewMode   = 'grid';
+
+function setView(mode) {
+  viewMode = mode;
+  document.querySelectorAll('.view-toggle-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.view === mode));
+  document.getElementById('app').style.display      = mode === 'grid' ? '' : 'none';
+  document.getElementById('list-app').style.display = mode === 'list' ? '' : 'none';
+}
+
+function showDay(key) {
+  currentDay = key;
+  document.querySelectorAll('.day-section, .list-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.day-btn').forEach(b => {
+    b.classList.remove('active');
+    b.style.background  = 'transparent';
+    b.style.borderColor = 'rgba(255,255,255,0.25)';
+  });
+  const sec     = document.querySelector(`.day-section[data-day="${key}"]`);
+  const listSec = document.querySelector(`.list-section[data-day="${key}"]`);
+  const btn     = document.querySelector(`.day-btn[data-day="${key}"]`);
+  if (sec)     sec.classList.add('active');
+  if (listSec) { listSec.classList.add('active'); fillListContent(key, listSort); }
+  if (btn) {
+    btn.classList.add('active');
+    const accent = DAY_META[key].accent;
+    btn.style.background  = accent;
+    btn.style.borderColor = accent;
+    // Nav-Accent-Linie
+    document.documentElement.style.setProperty('--day-accent', accent);
+  }
+}
+
+// ── Listen-Ansicht ─────────────────────────────────────────────────────────
+let listSort = 'time'; // 'time' | 'stage'
+
+function makeListItem([, stage, start, end, name]) {
+  const c    = STAGE_COLOR[stage] || '#555';
+  const item = document.createElement('div');
+  item.className = 'list-item';
+  item.innerHTML = `
+    <div class="list-item-bar" style="background:${c}"></div>
+    <div class="list-item-body">
+      <div class="list-item-meta">
+        <span class="list-item-time">${start} – ${end}</span>
+        <span class="list-item-stage" style="background:${c}">${stage}</span>
+      </div>
+      <div class="list-item-name">${name}</div>
+    </div>
+  `;
+  return item;
+}
+
+function fillListContent(dayKey, sort) {
+  const wrap = document.querySelector(`.list-section[data-day="${dayKey}"] .list-body-wrap`);
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const shows = SHOWS.filter(s => s[0] === dayKey);
+
+  if (sort === 'time') {
+    const sorted = shows.slice().sort((a, b) => t2m(a[2]) - t2m(b[2]) || a[1].localeCompare(b[1]));
+    const grouped = new Map();
+    sorted.forEach(s => {
+      if (!grouped.has(s[2])) grouped.set(s[2], []);
+      grouped.get(s[2]).push(s);
+    });
+    grouped.forEach((group, time) => {
+      const tg = document.createElement('div');
+      tg.className = 'list-time-group';
+      tg.textContent = time;
+      wrap.appendChild(tg);
+      group.forEach(s => wrap.appendChild(makeListItem(s)));
+    });
+  } else {
+    // Nach Bühne – Reihenfolge wie im Grid
+    STAGES_BY_DAY[dayKey].forEach(stage => {
+      const stageShows = shows.filter(s => s[1] === stage)
+                              .sort((a, b) => t2m(a[2]) - t2m(b[2]));
+      if (!stageShows.length) return;
+      const hdr = document.createElement('div');
+      hdr.className = 'list-stage-group-hdr';
+      hdr.style.background = STAGE_COLOR[stage] || '#555';
+      hdr.textContent = stage;
+      wrap.appendChild(hdr);
+      stageShows.forEach(s => wrap.appendChild(makeListItem(s)));
+    });
+  }
+}
+
+function setListSort(mode) {
+  listSort = mode;
+  document.querySelectorAll('.sort-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.sort === mode));
+  fillListContent(currentDay, mode);
+}
+
+function buildListDay(dayKey) {
+  const meta = DAY_META[dayKey];
+
+  const section = document.createElement('div');
+  section.className = 'list-section';
+  section.dataset.day = dayKey;
+
+  // Tagkopf (identisch zum Grid)
+  const hdr = document.createElement('div');
+  hdr.className = 'day-header';
+  hdr.style.color = meta.accent;
+  hdr.style.borderColor = meta.accent;
+  hdr.innerHTML = `
+    <div class="day-header-name" style="color:${meta.accent}">${meta.label}</div>
+    <div class="day-header-date">${meta.date}</div>
+    ${meta.sub ? `<div class="day-header-sub" style="background:${meta.accent}">${meta.sub}</div>` : ''}
+    <div style="margin-left:auto;font-size:10.5px;color:#C0C0C8;font-weight:600;letter-spacing:0.4px">ELECTRIC LOVE FESTIVAL 2026</div>
+  `;
+  section.appendChild(hdr);
+
+  // Sortier-Leiste
+  const sortBar = document.createElement('div');
+  sortBar.className = 'list-sort-bar';
+  sortBar.innerHTML = `
+    <span class="list-sort-label">Sortieren:</span>
+    <button class="sort-btn active" data-sort="time"  onclick="setListSort('time')">nach Zeit</button>
+    <button class="sort-btn"        data-sort="stage" onclick="setListSort('stage')">nach Bühne</button>
+  `;
+  section.appendChild(sortBar);
+
+  // Inhalts-Container – wird durch fillListContent befüllt
+  const wrap = document.createElement('div');
+  wrap.className = 'list-body-wrap';
+  section.appendChild(wrap);
+
+  return section;
+}
+
+// ── Print: dediziertes A4 landscape Layout ────────────────────────────────
+function buildPrintDay(dayKey) {
+  const stages = STAGES_BY_DAY[dayKey];
+  const meta   = DAY_META[dayKey];
+  const shows  = SHOWS.filter(s => s[0] === dayKey);
+
+  const mins  = shows.flatMap(s => [t2m(s[2]), t2m(s[3])]);
+  const t0    = Math.floor(Math.min(...mins) / 60) * 60;
+  const t1    = Math.ceil(Math.max(...mins)  / 60) * 60;
+  const total = t1 - t0;
+
+  // A4 landscape in mm
+  const PAD    = 7;
+  const PAGE_W = 297, PAGE_H = 210;
+  const HDR    = 14;   // Tagkopf-Höhe
+  const SHDR   = 10;   // Bühnen-Header-Höhe
+  const TW     = 13;   // Zeitspalten-Breite
+  const INNER_H  = PAGE_H - 2 * PAD;           // 196
+  const GRID_H   = INNER_H - HDR - SHDR - 3;   // ~169 (3 mm Puffer unten)
+  const GRID_W   = PAGE_W - 2 * PAD - TW;      // 265
+  const COL_W    = GRID_W / stages.length;
+  const mpm      = GRID_H / total;   // mm pro Minute
+  const big      = stages.length <= 3;
+
+  function css(obj) {
+    return Object.entries(obj).map(([k,v]) => `${k.replace(/([A-Z])/g,'-$1').toLowerCase()}:${v}`).join(';');
+  }
+
+  // ─ Seitenwrapper ─
+  const sec = document.createElement('div');
+  Object.assign(sec.style, {
+    width: PAGE_W + 'mm', height: PAGE_H + 'mm',
+    padding: PAD + 'mm',
+    boxSizing: 'border-box', position: 'relative',
+    pageBreakAfter: 'always', breakAfter: 'page',
+    overflow: 'hidden', background: 'white',
+    fontFamily: "'Inter',system-ui,sans-serif",
+    printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact',
+  });
+
+  // ─ Tagkopf ─
+  const hdrEl = document.createElement('div');
+  Object.assign(hdrEl.style, {
+    height: HDR + 'mm', display: 'flex', alignItems: 'center',
+    gap: '4pt', borderBottom: '1.5px solid ' + meta.accent,
+    boxSizing: 'border-box', paddingBottom: '2mm',
+  });
+  hdrEl.innerHTML = `
+    <span style="font-family:'Bebas Neue',sans-serif;font-size:18pt;color:${meta.accent};letter-spacing:1px;line-height:1">${meta.label}</span>
+    <span style="font-size:8pt;color:#666;font-weight:700;margin-left:2mm">${meta.date}</span>
+    ${meta.sub ? `<span style="font-size:6pt;font-weight:700;text-transform:uppercase;padding:1.5px 5px;background:${meta.accent};color:white;border-radius:2px;print-color-adjust:exact;-webkit-print-color-adjust:exact">${meta.sub}</span>` : ''}
+    <span style="margin-left:auto;font-size:5.5pt;color:#AAA;font-weight:600;letter-spacing:.4px">ELECTRIC LOVE FESTIVAL 2026 · SALZBURGRING</span>
+  `;
+  sec.appendChild(hdrEl);
+
+  // ─ Grid-Zeile ─
+  const GRID_ROW_H = INNER_H - HDR;  // 182
+  const gridRow = document.createElement('div');
+  Object.assign(gridRow.style, { display: 'flex', height: GRID_ROW_H + 'mm' });
+
+  // Zeitspalte
+  const timeColEl = document.createElement('div');
+  Object.assign(timeColEl.style, {
+    width: TW + 'mm', flexShrink: '0', position: 'relative',
+    paddingTop: SHDR + 'mm', boxSizing: 'border-box',
+  });
+  for (let h = 0; h <= total / 60; h++) {
+    const tm  = t0 + h * 60;
+    const top = SHDR + h * 60 * mpm;
+    if (top > GRID_ROW_H) break;
+    const lbl = document.createElement('div');
+    Object.assign(lbl.style, {
+      position: 'absolute', top: top + 'mm',
+      right: '1.5mm', left: '0', textAlign: 'right',
+      fontSize: '6pt', fontWeight: '700', color: '#555',
+      transform: 'translateY(-50%)', lineHeight: '1',
+    });
+    lbl.textContent = String(Math.floor((tm / 60) % 24)).padStart(2,'0') + ':00';
+    timeColEl.appendChild(lbl);
+  }
+  gridRow.appendChild(timeColEl);
+
+  // Bühnen-Bereich
+  const stagesEl = document.createElement('div');
+  Object.assign(stagesEl.style, {
+    display: 'flex', flex: '1', height: GRID_ROW_H + 'mm',
+    borderLeft: '1px solid #DDD',
+  });
+
+  stages.forEach(stage => {
+    const col = document.createElement('div');
+    Object.assign(col.style, {
+      width: COL_W + 'mm', flexShrink: '0', position: 'relative',
+      height: GRID_ROW_H + 'mm', borderRight: '1px solid #E4E4E4',
+      boxSizing: 'border-box', overflow: 'hidden',
+    });
+
+    // Bühnen-Header
+    const sh = document.createElement('div');
+    Object.assign(sh.style, {
+      height: SHDR + 'mm', background: STAGE_COLOR[stage],
+      color: 'white', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', textAlign: 'center',
+      fontSize: big ? '8pt' : '5.5pt', fontWeight: '700',
+      lineHeight: '1.2', padding: '1mm 1mm', boxSizing: 'border-box',
+      printColorAdjust: 'exact', WebkitPrintColorAdjust: 'exact',
+    });
+    sh.textContent = stage;
+    col.appendChild(sh);
+
+    // Alternierende Stunden-Bänder
+    for (let h = 0; h < total / 60; h++) {
+      if (h % 2 === 0) {
+        const band = document.createElement('div');
+        Object.assign(band.style, {
+          position: 'absolute',
+          top: (SHDR + h * 60 * mpm) + 'mm',
+          left: '0', right: '0',
+          height: (60 * mpm) + 'mm',
+          background: '#F7F7F7',
+        });
+        col.appendChild(band);
+      }
+    }
+
+    // Stundenlinien
+    for (let h = 0; h <= total / 60; h++) {
+      const top = SHDR + h * 60 * mpm;
+      if (top > GRID_ROW_H) break;
+      const line = document.createElement('div');
+      Object.assign(line.style, {
+        position: 'absolute', top: top + 'mm', left: '0', right: '0',
+        borderTop: (h % 2 === 0 ? '0.5px solid #C8C8C8' : '0.5px solid #E8E8E8'),
+      });
+      col.appendChild(line);
+    }
+
+    // Künstler-Blöcke
+    shows.filter(s => s[1] === stage).forEach(([,, start, end, name]) => {
+      const tm    = t2m(start);
+      const te    = t2m(end);
+      const dur   = te - tm;
+      const topMm = SHDR + (tm - t0) * mpm;
+      const htMm  = dur * mpm;
+      const GAP   = 0.3;
+      const c     = STAGE_COLOR[stage] || '#555';
+      const bw    = big ? '1.2mm' : '0.9mm';
+
+      if (htMm < 1.5) return;
+
+      const blk = document.createElement('div');
+      Object.assign(blk.style, {
+        position: 'absolute',
+        top: (topMm + GAP) + 'mm',
+        left: GAP + 'mm',
+        right: GAP + 'mm',
+        height: Math.max(htMm - GAP * 2, 2.5) + 'mm',
+        background: 'white',
+        border: '0.2mm solid rgba(0,0,0,0.09)',
+        borderLeft: bw + ' solid ' + c,
+        borderRadius: '0.7mm',
+        padding: '0.3mm ' + (big ? '1.5mm' : '1mm') + ' 0.3mm ' + (big ? '2mm' : '1.3mm'),
+        boxSizing: 'border-box',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        printColorAdjust: 'exact',
+        WebkitPrintColorAdjust: 'exact',
+        boxShadow: '0 0.15mm 0.5mm rgba(0,0,0,0.09)',
+      });
+
+      if (htMm > (big ? 4.5 : 3.5)) {
+        const timeEl = document.createElement('div');
+        Object.assign(timeEl.style, {
+          fontSize: big ? '6.5pt' : '5pt',
+          fontWeight: '700', color: c,
+          lineHeight: '1.1', whiteSpace: 'nowrap', flexShrink: '0',
+        });
+        timeEl.textContent = start + '–' + end;
+        blk.appendChild(timeEl);
+      }
+
+      if (htMm > (big ? 3 : 2.5)) {
+        const nameEl = document.createElement('div');
+        Object.assign(nameEl.style, {
+          fontSize: big ? '7.5pt' : (htMm > 7 ? '6pt' : '5.5pt'),
+          fontWeight: '800', color: '#111',
+          lineHeight: '1.2', overflow: 'hidden', flexShrink: '0',
+        });
+        nameEl.textContent = name;
+        blk.appendChild(nameEl);
+      }
+
+      col.appendChild(blk);
+    });
+
+    stagesEl.appendChild(col);
+  });
+
+  gridRow.appendChild(stagesEl);
+  sec.appendChild(gridRow);
+
+  // Fußzeile
+  const foot = document.createElement('div');
+  Object.assign(foot.style, {
+    position: 'absolute',
+    bottom: (PAD - 1) + 'mm', left: PAD + 'mm', right: PAD + 'mm',
+    fontSize: '4.5pt', color: '#CCC',
+    display: 'flex', justifyContent: 'space-between',
+  });
+  foot.innerHTML = '<span>Alle Zeiten CET · Änderungen vorbehalten</span>' +
+                   '<span>electriclove.at · Daten: offizielle ELF-App</span>';
+  sec.appendChild(foot);
+
+  return sec;
+}
+
+window.addEventListener('beforeprint', () => {
+  const pc = document.getElementById('print-layout');
+  pc.innerHTML = '';
+  ['mi','do','fr','sa'].forEach(day => pc.appendChild(buildPrintDay(day)));
+});
+
+window.addEventListener('afterprint', () => {
+  document.getElementById('print-layout').innerHTML = '';
+});
+
+// ── Sticky-Kopfzeile: top = echte Nav-Höhe ────────────────────────────────
+function updateStickyTop() {
+  const h = document.querySelector('.nav').offsetHeight;
+  document.querySelectorAll('.stage-header-wrap').forEach(el => el.style.top = h + 'px');
+}
+window.addEventListener('resize', updateStickyTop);
+
+// ── Init ───────────────────────────────────────────────────────────────────
+const app     = document.getElementById('app');
+const listApp = document.getElementById('list-app');
+['mi','do','fr','sa'].forEach(day => {
+  app.appendChild(buildDay(day));
+  listApp.appendChild(buildListDay(day));
+});
+setView(window.innerWidth < 768 ? 'list' : 'grid');
+showDay('do');
+requestAnimationFrame(updateStickyTop);
+</script>
+</body>
+</html>
