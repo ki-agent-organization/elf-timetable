@@ -20,31 +20,30 @@
   --hardvalley:   #CC3600;
   --nordic:       #007C88;
 
-  --mainstage-l:  #FCEAEC;
-  --heineken-l:   #E2F4EB;
-  --circus-l:     #FEF0DF;
+  --mainstage-l:  #FAEAEC;
+  --heineken-l:   #E3F4EB;
+  --circus-l:     #FDF0DF;
   --blueboxx-l:   #E0EAFF;
-  --shutdown-l:   #F2E0FF;
-  --hardvalley-l: #FAEAE0;
-  --nordic-l:     #DCF3F5;
+  --shutdown-l:   #F0E0FF;
+  --hardvalley-l: #FAE8E0;
+  --nordic-l:     #DEF2F4;
 
   --bg:       #FFFFFF;
-  --surface:  #F2F2F7;
   --text:     #111111;
   --subtle:   #6B7280;
-  --border:   #E5E5EA;
-  --grid-alt: #F8F8FA;
+  --border:   #E8E8E8;
+  --grid-alt: #F8F8F8;
 
   --hdr-h:   68px;
   --time-w:  64px;
-  --stage-h: 52px;
-  --col-w:   168px;
+  --stage-h: 56px;
+  --col-w:   172px;
 
   --card-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04);
   --card-radius: 8px;
 }
 
-html, body { height: 100%; background: var(--surface); }
+html, body { height: 100%; background: #FFFFFF; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
@@ -56,112 +55,99 @@ body {
 .nav {
   position: sticky; top: 0; z-index: 100;
   background: #0D0D0D;
-  display: flex; align-items: center; gap: 0;
+  display: flex; align-items: center;
   padding: 0 20px;
   height: var(--hdr-h);
-  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
-}
-
-/* thin accent stripe at nav bottom – color set by JS */
-.nav::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  background: var(--day-accent, #D62839);
-  transition: background 0.25s;
+  gap: 0;
 }
 
 .nav-title {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 24px;
+  font-size: 22px;
   color: white;
-  letter-spacing: 2px;
+  letter-spacing: 3px;
   white-space: nowrap;
-  margin-right: 28px;
+  margin-right: 32px;
 }
 
 .day-btns {
-  display: flex; gap: 6px;
+  display: flex; gap: 4px;
   flex: 1;
 }
 
 .day-btn {
   background: transparent;
-  border: 1.5px solid rgba(255,255,255,0.25);
-  color: rgba(255,255,255,0.6);
+  border: none;
+  color: rgba(255,255,255,0.4);
   border-radius: 6px;
-  padding: 8px 20px;
+  padding: 7px 18px;
   font-family: 'Inter', sans-serif;
   font-weight: 700;
   font-size: 13px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
   cursor: pointer;
   transition: all 0.15s;
   white-space: nowrap;
 }
-.day-btn:hover { border-color: white; color: white; }
-.day-btn.active {
-  color: white;
-  border-color: transparent;
-}
+.day-btn:hover { color: rgba(255,255,255,0.8); }
+.day-btn.active { color: white; }
 
 .print-btn {
   margin-left: auto;
-  background: white;
-  color: #111;
-  border: none;
+  background: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.65);
+  border: 1px solid rgba(255,255,255,0.15);
   border-radius: 6px;
-  padding: 9px 18px;
+  padding: 7px 14px;
   font-family: 'Inter', sans-serif;
-  font-weight: 700;
-  font-size: 13px;
+  font-weight: 600;
+  font-size: 12px;
   cursor: pointer;
   display: flex; align-items: center; gap: 6px;
-  transition: opacity 0.15s;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
-.print-btn:hover { opacity: 0.85; }
+.print-btn:hover { background: rgba(255,255,255,0.18); color: white; }
 
 /* ── Day section ──────────────────────────────────────────────────────────── */
 .day-section {
   display: none;
   background: var(--bg);
-  margin: 0;
 }
 .day-section.active { display: block; }
 
 /* ── Day header ───────────────────────────────────────────────────────────── */
 .day-header {
   display: flex;
-  align-items: center;
-  padding: 18px 20px 14px;
-  border-bottom: 2px solid currentColor;
-  gap: 14px;
+  align-items: flex-end;
+  padding: 28px 24px 16px;
+  border-bottom: 3px solid currentColor;
+  gap: 16px;
   background: var(--bg);
 }
 
 .day-header-name {
   font-family: 'Bebas Neue', sans-serif;
-  font-size: 40px;
-  line-height: 1;
-  letter-spacing: 2px;
+  font-size: 96px;
+  line-height: 0.88;
+  letter-spacing: -1px;
 }
 .day-header-date {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--subtle);
-  letter-spacing: 0.3px;
+  padding-bottom: 6px;
 }
 .day-header-sub {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 1px;
   text-transform: uppercase;
-  padding: 3px 9px;
-  border-radius: 5px;
+  padding: 4px 10px;
+  border-radius: 4px;
   color: white;
+  margin-bottom: 6px;
 }
-.day-header-sub span { color: white; }
 
 /* ── Grid ─────────────────────────────────────────────────────────────────── */
 .grid-scroll {
@@ -170,7 +156,6 @@ body {
 
 .grid {
   display: grid;
-  /* columns: time-label + stage columns */
   min-width: max-content;
 }
 
@@ -185,7 +170,7 @@ body {
   width: var(--time-w);
   height: var(--stage-h);
   flex-shrink: 0;
-  border-bottom: 2px solid var(--border);
+  border-bottom: 1px solid var(--border);
   border-right: 1px solid var(--border);
 }
 
@@ -195,10 +180,11 @@ body {
   text-align: center;
   color: white;
   font-weight: 700;
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   line-height: 1.3;
-  letter-spacing: 0.3px;
-  border-right: 2px solid white;
+  border-right: 2px solid rgba(255,255,255,0.2);
   padding: 6px 8px;
   width: var(--col-w);
   print-color-adjust: exact;
@@ -228,19 +214,19 @@ body {
   padding-right: 8px;
 }
 .time-marker.half {
-  border-top: 1px dashed #E8E8E8;
+  border-top: 1px dashed #EBEBEB;
 }
 .time-label {
   font-size: 11px;
-  font-weight: 700;
-  color: #444;
+  font-weight: 600;
+  color: #9CA3AF;
   margin-top: -7px;
   white-space: nowrap;
 }
 .time-marker.half .time-label {
   font-size: 9px;
   font-weight: 400;
-  color: #BBBBBB;
+  color: #D0D0D0;
 }
 
 /* ── Stage columns ────────────────────────────────────────────────────────── */
@@ -256,7 +242,6 @@ body {
   border-right: 1px solid var(--border);
 }
 
-/* alternating hour bands */
 .hour-band {
   position: absolute;
   left: 0; right: 0;
@@ -270,7 +255,7 @@ body {
   left: 3px; right: 3px;
   border-radius: var(--card-radius);
   overflow: hidden;
-  border-left: 5px solid;
+  border-left: 4px solid;
   background: var(--bg);
   padding: 5px 8px 5px 9px;
   display: flex;
@@ -281,7 +266,7 @@ body {
   transition: box-shadow 0.15s, transform 0.1s;
 }
 .show-block:hover {
-  box-shadow: 0 3px 10px rgba(0,0,0,0.13), 0 0 0 1px rgba(0,0,0,0.06);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
   transform: translateY(-1px);
 }
 
@@ -289,16 +274,15 @@ body {
   font-size: 9px;
   font-weight: 700;
   line-height: 1.2;
-  opacity: 0.9;
   white-space: nowrap;
   letter-spacing: 0.1px;
 }
 .show-name {
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.25;
   color: #111;
-  margin-top: 1px;
+  margin-top: 2px;
   overflow: hidden;
 }
 
@@ -306,15 +290,14 @@ body {
 .legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
-  padding: 12px 20px;
+  gap: 8px 20px;
+  padding: 14px 24px;
   border-top: 1px solid var(--border);
   background: var(--bg);
 }
 .legend-item {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 10.5px; font-weight: 600; color: var(--subtle);
-  letter-spacing: 0.1px;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11px; font-weight: 600; color: var(--subtle);
 }
 .legend-dot {
   width: 8px; height: 8px; border-radius: 2px;
@@ -324,8 +307,8 @@ body {
 /* ── Footer ───────────────────────────────────────────────────────────────── */
 .footer {
   text-align: center;
-  padding: 10px;
-  font-size: 9.5px;
+  padding: 12px;
+  font-size: 10px;
   color: #C0C0C8;
   background: var(--bg);
   border-top: 1px solid var(--border);
@@ -335,7 +318,7 @@ body {
 /* ── View-Toggle ───────────────────────────────────────────────────────────── */
 .view-toggle {
   display: flex;
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.08);
   border-radius: 6px;
   overflow: hidden;
   margin-left: 12px;
@@ -344,123 +327,124 @@ body {
 .view-toggle-btn {
   background: transparent;
   border: none;
-  color: rgba(255,255,255,0.5);
-  padding: 7px 12px;
+  color: rgba(255,255,255,0.45);
+  padding: 7px 13px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
   font-family: 'Inter', sans-serif;
   display: flex; align-items: center; gap: 5px;
   transition: all 0.15s;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
 }
-.view-toggle-btn.active { background: rgba(255,255,255,0.2); color: white; }
-.view-toggle-btn:hover  { color: white; }
+.view-toggle-btn.active { background: rgba(255,255,255,0.16); color: white; }
+.view-toggle-btn:hover  { color: rgba(255,255,255,0.85); }
 
 /* ── Listenansicht ─────────────────────────────────────────────────────────── */
 .list-section { display: none; }
 .list-section.active { display: block; }
 
 .list-sort-bar {
-  display: flex; align-items: center; gap: 6px;
-  padding: 8px 16px;
-  border-bottom: 1px solid #F0F0F0;
-  background: #FAFAFA;
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 24px;
+  border-bottom: 1px solid var(--border);
+  background: white;
 }
-.list-sort-label { font-size: 11px; color: #AAA; font-weight: 600; }
+.list-sort-label { font-size: 11px; color: #BBB; font-weight: 600; letter-spacing: 0.3px; }
 .sort-btn {
   background: transparent;
-  border: 1.5px solid #DDD;
+  border: 1.5px solid var(--border);
   border-radius: 5px;
-  padding: 4px 11px;
+  padding: 4px 12px;
   font-size: 11px; font-weight: 700;
-  color: #888; cursor: pointer;
+  color: #999; cursor: pointer;
   font-family: 'Inter', sans-serif;
   transition: all 0.12s;
 }
 .sort-btn.active          { background: #111; color: white; border-color: #111; }
-.sort-btn:not(.active):hover { border-color: #999; color: #444; }
+.sort-btn:not(.active):hover { border-color: #999; color: #555; }
 
-.list-body-wrap { padding: 4px 12px 24px; }
+.list-body-wrap { padding: 4px 16px 32px; }
 
 .list-time-group {
-  display: flex; align-items: center; gap: 10px;
-  padding: 14px 0 5px;
-  font-size: 10.5px; font-weight: 800;
-  color: #BBB; letter-spacing: 0.8px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 0 6px;
+  font-size: 11px; font-weight: 800;
+  color: #CCC; letter-spacing: 1px;
 }
-.list-time-group::after { content: ''; flex: 1; height: 1px; background: #EBEBEB; }
+.list-time-group::after { content: ''; flex: 1; height: 1px; background: #F0F0F0; }
 
 .list-stage-group-hdr {
-  color: white; font-weight: 700; font-size: 12px;
+  color: white; font-weight: 700; font-size: 11px;
   padding: 7px 12px; border-radius: 6px;
-  margin: 14px 0 6px;
-  letter-spacing: 0.3px;
+  margin: 16px 0 6px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
   print-color-adjust: exact; -webkit-print-color-adjust: exact;
 }
 
 .list-item {
   display: flex; align-items: stretch;
   margin: 3px 0; border-radius: 7px;
-  overflow: hidden; border: 1px solid #EBEBEB;
+  overflow: hidden; border: 1px solid #EDEDED;
   background: white; transition: box-shadow 0.12s;
 }
-.list-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.09); }
+.list-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
 
-.list-item-bar  { width: 5px; flex-shrink: 0; }
-.list-item-body { flex: 1; padding: 8px 12px; }
+.list-item-bar  { width: 4px; flex-shrink: 0; }
+.list-item-body { flex: 1; padding: 9px 14px; }
 
-.list-item-meta { display: flex; align-items: center; gap: 7px; margin-bottom: 3px; }
-.list-item-time  { font-size: 10px; font-weight: 700; color: #777; white-space: nowrap; }
-.list-item-stage { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 3px; color: white; }
+.list-item-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 3px; }
+.list-item-time  { font-size: 11px; font-weight: 700; color: #888; white-space: nowrap; }
+.list-item-stage { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 3px; color: white; letter-spacing: 0.5px; text-transform: uppercase; }
 .list-item-name  { font-size: 15px; font-weight: 800; color: #111; line-height: 1.2; }
 
-/* ── Raster-Kopfzeile (sticky, top per JS gesetzt) ────────────────────────── */
+/* ── Raster-Kopfzeile (sticky) ────────────────────────────────────────────── */
 .stage-header-wrap {
   display: flex;
   position: sticky;
-  top: 72px;        /* Fallback; wird per JS auf echte Nav-Höhe gesetzt */
+  top: 68px;
   z-index: 8;
   background: white;
 }
 
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 680px) {
-  /* Nav */
   .nav {
     flex-wrap: wrap;
     height: auto;
-    padding: 8px 12px;
+    padding: 10px 14px;
     gap: 8px;
   }
-  .nav-title   { font-size: 20px; margin-right: 0; }
+  .nav-title   { font-size: 18px; margin-right: 0; }
   .day-btns    { order: 3; width: 100%; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
   .day-btn     { padding: 7px 4px; font-size: 11px; text-align: center; justify-content: center; }
   .view-toggle { margin-left: auto; }
   .print-btn   { display: none; }
 
-  /* Grid */
   :root {
     --col-w:   110px;
     --time-w:    0px;
     --stage-h:  46px;
   }
-  .time-col       { display: none !important; }
-  .time-header    { display: none !important; }
+  .time-col         { display: none !important; }
+  .time-header      { display: none !important; }
   .time-marker.half { display: none !important; }
-  .time-marker    { border-top-color: #EEEEEE !important; }
-  .stage-header   { font-size: 10px; border-right-width: 1px; }
-  .day-header     { padding: 12px 12px 10px; flex-wrap: wrap; gap: 6px; }
-  .day-header-name { font-size: 26px; }
-  .legend         { padding: 10px 12px; gap: 8px; }
-  .legend-item    { font-size: 10px; }
-  .footer         { padding: 6px 12px; font-size: 9px; }
-  .grid-scroll    { -webkit-overflow-scrolling: touch; }
+  .time-marker      { border-top-color: #EEEEEE !important; }
+  .stage-header     { font-size: 9px; letter-spacing: 0.3px; border-right-width: 1px; }
+
+  .day-header      { padding: 20px 16px 14px; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+  .day-header-name { font-size: 56px; }
+
+  .legend      { padding: 10px 16px; gap: 8px; }
+  .legend-item { font-size: 10px; }
+  .footer      { padding: 8px 14px; font-size: 9px; }
+  .grid-scroll { -webkit-overflow-scrolling: touch; }
 
   /* iOS-Style Cards */
   .show-block {
     border-left-width: 0 !important;
-    border-radius: 12px !important;
+    border-radius: 10px !important;
     left: 2px !important; right: 2px !important;
     padding: 5px 8px !important;
     background: var(--tint, #F5F5F5) !important;
@@ -471,7 +455,6 @@ body {
   .show-time {
     font-size: 9px !important;
     font-weight: 700 !important;
-    opacity: 1 !important;
     color: var(--stage-color, #555) !important;
   }
   .show-name {
@@ -827,7 +810,6 @@ function buildDay(dayKey) {
     <div class="day-header-name" style="color:${meta.accent}">${meta.label}</div>
     <div class="day-header-date">${meta.date}</div>
     ${meta.sub ? `<div class="day-header-sub" style="background:${meta.accent}">${meta.sub}</div>` : ''}
-    <div style="margin-left:auto;font-size:10.5px;color:#C0C0C8;font-weight:600;letter-spacing:0.4px">ELECTRIC LOVE FESTIVAL 2026</div>
   `;
   section.appendChild(hdr);
 
@@ -1017,8 +999,8 @@ function showDay(key) {
   document.querySelectorAll('.day-section, .list-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.day-btn').forEach(b => {
     b.classList.remove('active');
-    b.style.background  = 'transparent';
-    b.style.borderColor = 'rgba(255,255,255,0.25)';
+    b.style.background = 'transparent';
+    b.style.color      = '';
   });
   const sec     = document.querySelector(`.day-section[data-day="${key}"]`);
   const listSec = document.querySelector(`.list-section[data-day="${key}"]`);
@@ -1028,10 +1010,8 @@ function showDay(key) {
   if (btn) {
     btn.classList.add('active');
     const accent = DAY_META[key].accent;
-    btn.style.background  = accent;
-    btn.style.borderColor = accent;
-    // Nav-Accent-Linie
-    document.documentElement.style.setProperty('--day-accent', accent);
+    btn.style.background = accent;
+    btn.style.color      = 'white';
   }
 }
 
@@ -1115,7 +1095,6 @@ function buildListDay(dayKey) {
     <div class="day-header-name" style="color:${meta.accent}">${meta.label}</div>
     <div class="day-header-date">${meta.date}</div>
     ${meta.sub ? `<div class="day-header-sub" style="background:${meta.accent}">${meta.sub}</div>` : ''}
-    <div style="margin-left:auto;font-size:10.5px;color:#C0C0C8;font-weight:600;letter-spacing:0.4px">ELECTRIC LOVE FESTIVAL 2026</div>
   `;
   section.appendChild(hdr);
 
